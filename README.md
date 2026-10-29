@@ -53,7 +53,13 @@ In every matched condition legumin's backbone RMSD is higher, roughly 1.5–2× 
 
 ### 3. Peak flexibility sits in different regions
 
-The most flexible residue in legumin falls between 276 and 310 in all four conditions, in or next to the loop region above. In vicilin it stays around 176–185 at both temperatures. Residue numbers are counted within a chain. The RMSF atom group also differs between the two proteins' original runs (all protein atoms for vicilin, mostly backbone for legumin), and RMSF should only be compared between proteins on the same group. The `rmsf_*_allatom.xvg` and `rmsf_*_backbone.xvg` files let you do that for vicilin; check which group the legumin files use before comparing peak positions.
+The most flexible residues in legumin fall between 260 and 320 in both chains and at both temperatures. Mean RMSF there is 0.32–0.33 nm at 300 K and 0.62–0.67 nm at 400 K, about 3× the rest of the chain, with the highest peaks at D276 (300 K) and E290 (400 K). This stretch is intrinsically disordered, not just loosely packed. It stays 100% coil, has a pLDDT of about 28, and is fully solvent-exposed (SASA 1.6 vs 0.5 nm² per residue elsewhere). It forms almost no hydrogen bonds (0.3–0.4 per residue per frame vs about 1.8 elsewhere) and makes no contacts with the other chain. Its sequence is a charged repeat, 31% Glu and 20% Arg, with a net charge of −8.
+
+In vicilin the peak sits at 150–190 and has a different character. It is a helix (150–169), a disordered Glu/Gln-rich linker (170–183, 100% coil, pLDDT 48), and a short helix (184–190) that loses structure on heating. That last helix is 99% (chain A) and 71% (chain B) helical at 300 K, and 58% and 51% at 400 K. This region is the strongest in chain A at both temperatures (Q179 at 300 K, K185 at 400 K). In chain B the 400 K maximum moves to 375–400.
+
+Chains A and B differ in both proteins because the dimers pack asymmetrically. A helix that is buried in one chain is rigid there and exposed and mobile in the other. In vicilin 150–169, SASA is 0.86 vs 0.41 nm² and RMSF is 0.19 vs 0.09 nm (chain A vs B, 300 K). In legumin, 215–232 and 475–495 show the same pattern with the chains reversed.
+
+Heating raises RMSF about 2× in legumin and 1.4–1.7× in vicilin, across the whole protein in both cases. Heat therefore amplifies the existing hotspots rather than creating new ones. Residue numbers are counted within a chain. The RMSF atom group differs between the two proteins' original runs (all protein atoms for vicilin, mostly backbone for legumin), so compare peak positions between proteins, not magnitudes. The `rmsf_*_allatom.xvg` and `rmsf_*_backbone.xvg` files let you check this for vicilin.
 
 ### What this might mean for processing
 
