@@ -1,126 +1,117 @@
-# Comparative Molecular Dynamics of Pea Legumin and Vicilin Homodimers
+ # Comparative molecular dynamics of pea legumin and vicilin homodimers
 
-**Structural and dynamic characterization of two major pea seed storage proteins as a foundation for computational protein engineering toward plant-based meat alternatives.**
+Short MD runs of two pea seed storage proteins at 300 K and 400 K, meant as a starting point for computational work on plant-based meat alternatives.
 
 ---
 
 ## Motivation
 
-Global protein demand is outpacing sustainable supply, and animal agriculture remains a major driver of land use, water consumption, and greenhouse gas emissions. Plant-based meat alternatives offer a scalable path forward, but replicating the texture and functional behavior of animal muscle protein networks requires a detailed understanding of the plant proteins used as substitutes.
+Global protein demand is outpacing sustainable supply, and animal agriculture is a major driver of land use, water consumption and greenhouse gas emissions. Plant-based meat is one way to ease that pressure, but copying the texture of animal muscle protein networks requires knowing how the plant proteins behave structurally.
 
-This project focuses on **pea legumin** (UniProt P02857) and **pea vicilin** (UniProt Q702P1) — two of the dominant storage proteins in *Pisum sativum*, a legume grown widely across South Asia, including Pakistan's Punjab region, where food security and agricultural sustainability are pressing regional concerns. Understanding how these proteins behave structurally under different thermal conditions is a first step toward rational engineering of plant-protein-based food matrices.
+This project looks at **pea legumin** (UniProt P02857) and **pea vicilin** (UniProt Q702P1), two of the main storage proteins in *Pisum sativum*. Peas are grown widely across South Asia, including Pakistan's Punjab, where food security and agricultural sustainability are pressing concerns. How these proteins respond to heat is a first step toward rationally engineering plant-protein food matrices.
 
 ## Overview
 
-This repository presents an end-to-end computational pipeline:
+Pipeline: **AlphaFold3 structure prediction → GROMACS molecular dynamics → trajectory analysis → comparison**
 
-**AlphaFold3 structure prediction → GROMACS molecular dynamics simulation → trajectory analysis → comparative structural dynamics**
+Both proteins were modeled as homodimers (AlphaFold3 predictions made on AlphaFold Server, outside the notebooks) and simulated at 300 K and 400 K. Each temperature is **one 500 ps trajectory**, run as 200 ps of production and then extended by 300 ps. Results are reported over two windows of that trajectory, 0–200 ps and 0–500 ps. The 200 ps window is simply the first part of the 500 ps run, so each protein has two independent trajectories, not four. The four "conditions" per protein are four views of those two runs.
 
-Both proteins were modeled as homodimers and simulated at two temperatures (300K, 400K) across two timescales (200ps, 500ps), yielding four independent production conditions per protein. Structural stability (RMSD), compactness (radius of gyration), solvent exposure (SASA), intramolecular hydrogen bonding, and per-residue flexibility (RMSF) were tracked throughout, then directly compared between the two proteins under matched conditions.
+Tracked metrics: backbone RMSD, radius of gyration (Rg), SASA, protein–protein hydrogen bonds (within and between the two chains), per-residue RMSF, and, for vicilin, DSSP secondary structure.
 
-## Key Findings
+### The two protein setups are not identical
 
-### 1. Legumin exhibits a thermally-induced compaction signature that vicilin does not
+| Setting | Legumin | Vicilin |
+|---|---|---|
+| Ions | 0.15 M NaCl (1,238 ions) | 17 Na⁺ only, no added salt (about 14 mM) |
+| Cubic box | 18.94 nm | 12.53 nm |
+| Barostat | Parrinello-Rahman | C-rescale |
+| Dispersion correction | none explicit | `DispCorr = EnerPres` |
+| Trajectory output interval | 1 ps | 2 ps |
+| Energy minimization | stopped at machine precision | converged to Fmax < 1000 kJ/mol/nm |
 
-At 400K over the 500ps trajectory, legumin shows a coordinated structural response absent
-from every other condition tested — and absent from vicilin entirely:
+Because of these differences, every legumin-versus-vicilin comparison below is qualitative. Ionic strength alone can change electrostatic screening and compaction.
 
-| Metric | Legumin 400K/500ps | All other Legumin conditions | All Vicilin conditions |
+## Key findings
+
+All findings come from single, unreplicated trajectories. Read them as observations to test, not conclusions.
+
+### 1. Legumin at 400 K / 500 ps is the one condition that compacts
+
+| Metric | Legumin 400 K / 500 ps | Other legumin conditions | All vicilin conditions |
 |---|---|---|---|
 | ΔRg (%) | **−1.09%** (compaction) | +0.96% to +1.96% (expansion) | +1.58% to +3.44% (expansion) |
 | ΔSASA (%) | **−2.27%** (buried surface) | +0.02% to +1.32% (exposure) | +1.50% to +3.57% (exposure) |
 | ΔH-bonds | **+3** (net gain) | −10 to −48 (net loss) | −22 to −56 (net loss) |
 
-This is the only condition, across both proteins and all four temperature/duration
-combinations, where radius of gyration and solvent-accessible surface area both *decrease*
-while intramolecular hydrogen bonding *increases* — the classic signature of a folding/
-compaction event rather than progressive unfolding. Every other trajectory (legumin at
-300K, and vicilin at all four conditions) shows the opposite: Rg and SASA rising and
-H-bond count falling, consistent with normal thermal loosening of the structure.
+Δ is the mean of the last 10% of the window minus the mean of the first 10%. In this one condition Rg and SASA both drop while the protein–protein hydrogen-bond count goes up. Every other trajectory shows the reverse: Rg and SASA rise and H-bonds fall, which looks like ordinary thermal loosening. The legumin pattern is consistent with compaction, but the Rg change is small (about 1%) and comes from one run, so it needs replicates before anyone calls it a structural event. The contrast with vicilin is also confounded by the different ionic strength (see the table above). The 400 K / 200 ps and 400 K / 500 ps legumin results share the same first 200 ps, so they are not separate confirmations of each other.
 
-The compaction is not a whole-molecule effect: it is concentrated in the 260–320 residue
-loop region, with visible asymmetry between chain A and chain B — one monomer tightens
-more than the other, rather than both chains responding identically. This localized,
-asymmetric behavior suggests a specific structural motif rather than a uniform global
-response to heat.
+Per-residue RMSF in legumin is highest in the 260–320 loop region, and chain A and chain B differ. RMSF measures fluctuation, not compaction, so these analyses do not show that this loop is what compacts. Per-chain Rg or a contact analysis would test that.
 
-### 2. Legumin is structurally less stable than vicilin at baseline
+### 2. Legumin has higher whole-dimer RMSD than vicilin
 
-Across every matched condition, legumin shows meaningfully higher RMSD than vicilin
-(roughly 1.5–2× higher at 300K, widening further at 400K). Legumin's RMSD nearly triples
-from 300K to 400K (0.28 nm → 0.60 nm mean, 500ps), while vicilin's only doubles (0.18 nm →
-0.31 nm). This indicates legumin's dimer interface is intrinsically more conformationally
-flexible than vicilin's, independent of the compaction event described above — vicilin
-is the more thermally robust of the two proteins under these simulation conditions.
+In every matched condition legumin's backbone RMSD is higher, roughly 1.5–2× at 300 K and more at 400 K. Mean RMSD over 500 ps goes from 0.28 nm to 0.60 nm for legumin and from 0.18 nm to 0.31 nm for vicilin between 300 K and 400 K. In these simulations vicilin stayed closer to its starting structure. RMSD here is calculated over the whole dimer, so it says nothing specific about the dimer interface, and with different salt, box, barostat and output settings it cannot be assigned to the proteins alone.
 
-### 3. Peak flexibility maps to different regions between the two proteins
+### 3. Peak flexibility sits in different regions
 
-RMSF analysis identifies the most flexible residue in each condition. Legumin's peak
-flexibility clusters in the 276–310 range across all four conditions (within or adjacent
-to the loop region implicated in the compaction event), while vicilin's peak flexibility
-sits consistently around residue 176–185 — a distinct, temperature-invariant hotspot.
-This difference in *where* flexibility concentrates, rather than just *how much* flexibility
-exists, points to different structural vulnerabilities between the two storage proteins.
+The most flexible residue in legumin falls between 276 and 310 in all four conditions, in or next to the loop region above. In vicilin it stays around 176–185 at both temperatures. Residue numbers are counted within a chain. The RMSF atom group also differs between the two proteins' original runs (all protein atoms for vicilin, mostly backbone for legumin), and RMSF should only be compared between proteins on the same group. The `rmsf_*_allatom.xvg` and `rmsf_*_backbone.xvg` files let you do that for vicilin; check which group the legumin files use before comparing peak positions.
 
-### Implications for plant-protein food applications
+### What this might mean for processing
 
-These results suggest legumin and vicilin would behave differently under the thermal
-conditions relevant to high-moisture extrusion and other plant-based meat processing:
-vicilin's greater conformational stability may make it more resistant to thermally-induced
-structural rearrangement, while legumin's localized compaction behavior could translate to
-different textural or network-forming properties during thermal processing. Validating this
-functional link would require complementary experimental work beyond the scope of this
-computational study.
+If the differences held up, vicilin might resist heat-driven rearrangement better, while legumin's compaction could matter for network formation. That link is speculation. 400 K in explicit water at 1 bar is a stress condition, not a model of extrusion, and 500 ps is far shorter than any processing step. Testing it would take experimental work such as DSC or circular dichroism.
 
 ### Limitations
 
-These findings are based on single production-run trajectories per condition (not
-replicated), relatively short timescales (200–500ps) relative to the biological processes
-being modeled, and homodimer models rather than the full native oligomeric assemblies.
-The compaction signature and stability differences reported here should be treated as
-hypothesis-generating rather than conclusive, warranting validation via replicate
-simulations and, ideally, experimental thermal analysis (e.g., DSC, circular dichroism).
+- One trajectory per temperature, 200–500 ps, no replicates. Error bars are within-run only.
+- Homodimers, not the native trimer or hexamer assemblies.
+- Different ionic strength, box size, barostat, dispersion correction and output interval for the two proteins.
+- Initial velocities were random (`gen_vel = yes`, `gen_seed = -1`), so reruns are not bit-identical.
+- No experimental reference for either protein.
+- The 200 ps and 500 ps results are nested windows of the same run.
 
-## Repository Structure
+## Repository structure
 
-- **structures/** — AlphaFold3 output structures (.cif) and processed dimer PDBs
-- **alphafold_predictions/** — AlphaFold confidence (pLDDT) and chain-colored visualizations
-- **simulation_setup/** - GROMACS .mdp parameter files for both proteins (complete: em, ions, nvt, npt, md × 4 conditions each) 
-- **simulations/** — Raw analysis output (.xvg) per protein, per condition
-- - **analysis/** — `legumin/` and `vicilin/` hold per-protein plots (RMSD, Rg, SASA, H-bonds, RMSF) across all four conditions; `comparison/legumin_vs_vicilin/` holds head-to-head plots per condition, including relative/normalized Rg and SASA comparisons; `summary_table.csv`/`.md` condenses all 8 conditions into one numeric table referenced in Key Findings
-- **movies/** — Rendered MD trajectory visualizations (PyMOL)
-- **notebooks/** — Full analysis pipeline (Colab-executed)
-- **docs/methods.md** — Detailed methodology, software versions, parameters
+- **structures/**: AlphaFold3 output structures (.cif) and processed dimer PDBs
+- **alphafold_predictions/**: pLDDT confidence and chain-coloured images, rendered in PyMOL
+- **simulation_setup/**: GROMACS `.mdp` files for both proteins, in one folder per protein. Each has `em` and `ions`, plus `nvt` and `npt` for 300 K and 400 K, and 200 ps `md` files for 300 K and 400 K. The 500 ps trajectories were made by extending the 200 ps runs with `gmx convert-tpr -extend 300`, so there is no separate 500 ps `.mdp`.
+- **simulations/**: raw analysis output (`.xvg`, plus DSSP `.dat` for vicilin) per protein and condition. Some `.xvg` files use ns for time and others ps, so check the axis label before plotting.
+- **analysis/**: `legumin/` and `vicilin/` hold per-protein plots (RMSD, Rg, SASA, H-bonds, RMSF); `comparison/legumin_vs_vicilin/` holds head-to-head plots, including normalized Rg and SASA; `summary_table.csv` and `.md` collect all 8 conditions
+- **movies/**: PyMOL trajectory renderings
+- **notebooks/**: simulation and analysis notebooks (see the note below on their status)
+- **docs/methods.md**: methodology, software versions, parameters
 
-   
- ## Methods Summary
+## Methods summary
 
 | Stage | Tool | Details |
 |---|---|---|
-| Structure prediction | AlphaFold3 | Homodimer models for both proteins |
-| MD engine | GROMACS 2026.3 (conda-forge, CUDA) | GPU-accelerated (Colab T4) |
+| Structure prediction | AlphaFold3 (AlphaFold Server) | Homodimer models; not part of the notebooks |
+| MD engine | GROMACS 2026.3 (conda-forge, CUDA build) | Google Colab GPU, model not recorded |
 | Force field | AMBER99SB-ILDN | |
-| Water model | SPC/E | |
-| Conditions | 300K, 400K × 200ps, 500ps | 4 conditions per protein |
-| Analysis | RMSD, Rg, SASA, H-bonds, RMSF (chain-split) | via `gmx rms`, `gmx gyrate`, `gmx sasa`, `gmx hbond`, `gmx rmsf` |
-| Visualization | PyMOL, Matplotlib | Structure rendering and trajectory plots |
+| Water | SPC/E | |
+| Ions | Neutralizing Na⁺; legumin additionally 0.15 M NaCl | Vicilin has no added salt |
+| Runs | 300 K and 400 K, 200 ps extended to 500 ps | 2 trajectories per protein |
+| Analysis | `gmx rms`, `gyrate`, `sasa`, `hbond`, `rmsf` (whole dimer and per chain), `gmx dssp` (vicilin) | H-bonds are protein–protein, within and between chains |
+| Visualization | PyMOL, Matplotlib | Trajectory movies and plots |
 
-Full parameter details, exact command-line invocations, and version numbers are documented in [`docs/methods.md`](docs/methods.md).
+Full parameters and command lines are in [`docs/methods.md`](https://github.com/malikahmedhassanawan/Legumin-Vicilin-Dimer-Thermal-MD/blob/main/docs/methods.md).
 
-## Reproducing This Work
+## Reproducing this work
 
-All simulations were run in Google Colab using free-tier GPU resources, making this pipeline accessible without dedicated HPC infrastructure. The full notebook pipeline is provided in [`notebooks/`](notebooks/), covering:
+The simulations ran in Google Colab on a GPU runtime, so no HPC cluster is needed. Every minimization, equilibration, production and extension step used GROMACS 2026.3 (CUDA). Later post-processing used a non-CUDA 2026.3 build, which does not affect the analysis. The GPU model was not recorded.
 
-1. Structure prediction and preprocessing
-2. GROMACS simulation setup and production runs
-3. Trajectory analysis and comparative visualization
+The notebooks in [`notebooks/`](https://github.com/malikahmedhassanawan/Legumin-Vicilin-Dimer-Thermal-MD/blob/main/notebooks) were assembled and cleaned from several working sessions. **They have not been run end to end in their current form.** Cells that differ from what was originally run are marked `[changed]` or `[new]`. The DSSP step and the 400 K vicilin movie were added afterward, because the original files came from separate sessions.
+
+They cover:
+
+1. System preparation, minimization and equilibration
+2. Production runs and extension to 500 ps
+3. Trajectory processing, analysis and within-run statistics
+4. PyMOL movies
+
+AlphaFold3 prediction is not included. Run it on AlphaFold Server and place the output in `structures/`.
 
 ## Author
 
-**Malik Ahmed Hassan Awan**
-BS (Hons) Food Science and Technology, Bahauddin Zakariya University, Multan, Pakistan
+**Malik Ahmed Hassan Awan**, BS (Hons) Food Science and Technology, Bahauddin Zakariya University, Multan, Pakistan
 Contact: varietyhavenllc@gmail.com
 
----
-
-*This work is part of an ongoing research effort connecting computational protein science to food security challenges in South Punjab, Pakistan, using locally available legume crops as a model system for sustainable protein engineering.*
+*Part of ongoing work connecting computational protein science to food security in South Punjab, using locally grown legumes as a model system.*
