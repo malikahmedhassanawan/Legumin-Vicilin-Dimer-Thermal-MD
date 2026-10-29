@@ -1,5 +1,0 @@
-temperature_K,chain,SASA_per_res_window,SASA_per_res_rest,pLDDT_window,pLDDT_rest,coil_turn_frac_window,helix_frac_window,strand_frac_window,coil_turn_frac_rest,RMSF_mean_window,RMSF_max_window,RMSF_mean_rest,Hbonds_per_res_window,Hbonds_per_res_rest
-300,A,1.04,0.447,66.275,85.207,0.489,0.511,0.0,0.437,0.199,0.342,0.081,,
-300,B,0.821,0.462,65.459,85.3,0.536,0.464,0.0,0.445,0.14,0.322,0.083,,
-400,A,1.009,0.452,66.275,85.207,0.574,0.426,0.0,0.465,0.346,0.506,0.135,0.21,0.355
-400,B,0.777,0.471,65.459,85.3,0.581,0.418,0.0,0.47,0.193,0.352,0.129,0.196,0.363
